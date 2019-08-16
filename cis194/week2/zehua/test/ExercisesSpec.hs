@@ -57,3 +57,24 @@ spec = do
         LogMessage Info 4076 "verse.'",
         LogMessage Info 4764 "He trusts to you to set them free,"
         ]
+
+  describe "ex2" $ do
+    it "returns original when given unknown" $ do
+      insert (Unknown "unknown msg") Leaf `shouldBe` Leaf
+      insert (Unknown "unknown msg") (Node Leaf (LogMessage Info 123 "info") Leaf)
+        `shouldBe` (Node Leaf (LogMessage Info 123 "info") Leaf)
+
+    it "handles leaf node" $ do
+      insert (LogMessage Warning 123 "warn") Leaf `shouldBe`
+        (Node Leaf (LogMessage Warning 123 "warn") Leaf)
+
+    it "inserts to left when smaller" $ do
+      insert (LogMessage Warning 123 "warn") (Node Leaf (LogMessage Info 124 "info") Leaf)`shouldBe`
+        (Node (Node Leaf (LogMessage Warning 123 "warn") Leaf) (LogMessage Info 124 "info") Leaf)
+
+    it "inserts to right when equal or greater" $ do
+      insert (LogMessage Warning 123 "warn") (Node Leaf (LogMessage Info 122 "info") Leaf)`shouldBe`
+        (Node Leaf (LogMessage Info 122 "info") (Node Leaf (LogMessage Warning 123 "warn") Leaf))
+
+      insert (LogMessage Warning 123 "warn") (Node Leaf (LogMessage Info 123 "info") Leaf)`shouldBe`
+        (Node Leaf (LogMessage Info 123 "info") (Node Leaf (LogMessage Warning 123 "warn") Leaf))

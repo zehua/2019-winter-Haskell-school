@@ -31,3 +31,11 @@ parseMessage s =
 
 parse :: String -> [LogMessage]
 parse = fmap parseMessage . lines
+
+-- ex2
+insert :: LogMessage -> MessageTree -> MessageTree
+insert (Unknown _) t = t
+insert lm Leaf = Node Leaf lm Leaf
+insert lm@(LogMessage _ ts _ ) (Node l lm1@(LogMessage _ ts1 _) r)
+  | ts < ts1 = Node (insert lm l) lm1 r
+  | otherwise = Node l lm1 (insert lm r)
