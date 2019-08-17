@@ -1,9 +1,9 @@
 module ExercisesSpec where
 
-import Data.List (sort)
-import Test.Hspec
-import Exercises
-import Log
+import           Data.List  (sort)
+import           Exercises
+import           Log
+import           Test.Hspec
 
 -- util to make LogMessage sortable.
 -- Using `newtype` to avoid having to touch the original def in Log.hs
