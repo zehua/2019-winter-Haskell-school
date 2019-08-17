@@ -5,11 +5,20 @@ import Test.Hspec
 import Exercises
 import Log
 
--- ad-hoc instance def to make it sortable
-instance Ord LogMessage where
-  Unknown _ <= _         = True
-  _ <= Unknown _         = False
-  LogMessage _ ts1 _ <= LogMessage _ ts2 _ = ts1 <= ts2
+-- util to make LogMessage sortable.
+-- Using `newtype` to avoid having to touch the original def in Log.hs
+newtype SortableLogMessage = SortableLogMessage { getLogMessage :: LogMessage } deriving (Eq, Show)
+instance Ord SortableLogMessage where
+  a1 <= a2 = let b1 = getLogMessage a1
+                 b2 = getLogMessage a2
+             in b1 `lteq` b2
+               where
+                 Unknown _ `lteq` _         = True
+                 _ `lteq` Unknown _         = False
+                 LogMessage _ ts1 _ `lteq` LogMessage _ ts2 _ = ts1 <= ts2
+
+sortLogMessages :: [LogMessage] -> [LogMessage]
+sortLogMessages = fmap getLogMessage . sort . fmap SortableLogMessage
 
 spec :: Spec
 spec = do
@@ -128,7 +137,7 @@ spec = do
               , (LogMessage Info 122 "first")
               , (LogMessage (Error 1) 123 "second")
               , (LogMessage (Error 2) 125 "fourth") ]
-      (inOrder . build) input `shouldBe` sort input
+      (inOrder . build) input `shouldBe` sortLogMessages input
 
   describe "ex5" $ do
     it "handles empty list" $ do
