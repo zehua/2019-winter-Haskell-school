@@ -1,8 +1,8 @@
 module Exercises where
 
-import           Data.Maybe
+import           Data.Maybe (fromJust)
 import           Log
-import           Text.Read
+import           Text.Read (readMaybe)
 
 -- ex1
 parseInt :: String -> Maybe TimeStamp
@@ -36,10 +36,11 @@ parse = fmap parseMessage . lines
 -- ex2
 insert :: LogMessage -> MessageTree -> MessageTree
 insert (Unknown _) t = t
-insert lm Leaf = Node Leaf lm Leaf
+insert lm Leaf       = Node Leaf lm Leaf
 insert lm@(LogMessage _ ts _ ) (Node l lm1@(LogMessage _ ts1 _) r)
   | ts < ts1 = Node (insert lm l) lm1 r
   | otherwise = Node l lm1 (insert lm r)
+insert _ t           = t
 
 -- ex3
 build :: [LogMessage] -> MessageTree
