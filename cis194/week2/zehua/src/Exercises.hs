@@ -62,7 +62,7 @@ whatWentWrong = fmap (fromJust . getMessage) . filter error50 . inOrder . build
 -- ex6
 -- sort events and find the events happened before a particular log message
 findEventsBefore :: String -> [LogMessage] -> [LogMessage]
-findEventsBefore event msgs = takeWhile (notseen event) . filter known . inOrder . build $ msgs
+findEventsBefore event = takeWhile (notseen event) . filter known . inOrder . build
   where
     notseen e (LogMessage _ _ m) = e /= m
     notseen _ _                  = False
