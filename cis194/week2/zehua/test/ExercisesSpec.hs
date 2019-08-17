@@ -122,17 +122,13 @@ spec = do
                    , (LogMessage Warning 124 "third")
                    , (LogMessage (Error 2) 125 "fourth") ]
 
-    it "combines with build to be sort" $ do
-      (inOrder . build)
-          [ (LogMessage Warning 124 "third")
-          , (LogMessage Info 122 "first")
-          , (LogMessage (Error 1) 123 "second")
-          , (LogMessage (Error 2) 125 "fourth") ]
-        `shouldBe` sort
-          [ (LogMessage Warning 124 "third")
-          , (LogMessage Info 122 "first")
-          , (LogMessage (Error 1) 123 "second")
-          , (LogMessage (Error 2) 125 "fourth") ]
+    it "combines with build should be equivalent to sort without Unknown" $ do
+      let input  =
+              [ (LogMessage Warning 124 "third")
+              , (LogMessage Info 122 "first")
+              , (LogMessage (Error 1) 123 "second")
+              , (LogMessage (Error 2) 125 "fourth") ]
+      (inOrder . build) input `shouldBe` sort input
 
   describe "ex5" $ do
     it "handles empty list" $ do
