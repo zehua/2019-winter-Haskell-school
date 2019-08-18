@@ -17,9 +17,6 @@ instance Ord SortableLogMessage where
                  _ `lteq` Unknown _         = False
                  LogMessage _ ts1 _ `lteq` LogMessage _ ts2 _ = ts1 <= ts2
 
-sortLogMessages :: [LogMessage] -> [LogMessage]
-sortLogMessages = fmap getLogMessage . sort . fmap SortableLogMessage
-
 spec :: Spec
 spec = do
   describe "ex1.parseMessage" $ do
@@ -137,6 +134,8 @@ spec = do
               , (LogMessage Info 122 "first")
               , (LogMessage (Error 1) 123 "second")
               , (LogMessage (Error 2) 125 "fourth") ]
+          sortLogMessages :: [LogMessage] -> [LogMessage]
+          sortLogMessages = fmap getLogMessage . sort . fmap SortableLogMessage
       (inOrder . build) input `shouldBe` sortLogMessages input
 
   describe "ex5" $ do
