@@ -1,6 +1,6 @@
 module Exercises where
 
-import           Data.Maybe (catMaybes)
+import           Data.Maybe (mapMaybe)
 import           Log
 import           Text.Read  (readMaybe)
 
@@ -53,7 +53,7 @@ inOrder (Node l lm r) = inOrder l ++ [lm] ++ inOrder r
 
 -- ex5
 whatWentWrong :: [LogMessage] -> [String]
-whatWentWrong = catMaybes . fmap getMessageMaybe . filter error50 . inOrder . build
+whatWentWrong = mapMaybe getMessageMaybe . filter error50 . inOrder . build
   where
     error50 (LogMessage (Error s) _ _) = s >= 50
     error50 _                          = False
