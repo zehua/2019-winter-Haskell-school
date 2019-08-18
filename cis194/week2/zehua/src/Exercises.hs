@@ -1,8 +1,8 @@
 module Exercises where
 
-import           Data.Maybe (fromJust)
+import           Data.Maybe (catMaybes)
 import           Log
-import           Text.Read (readMaybe)
+import           Text.Read  (readMaybe)
 
 -- ex1
 parseInt :: String -> Maybe TimeStamp
@@ -53,12 +53,12 @@ inOrder (Node l lm r) = inOrder l ++ [lm] ++ inOrder r
 
 -- ex5
 whatWentWrong :: [LogMessage] -> [String]
-whatWentWrong = fmap (fromJust . getMessage) . filter error50 . inOrder . build
+whatWentWrong = catMaybes . fmap getMessageMaybe . filter error50 . inOrder . build
   where
     error50 (LogMessage (Error s) _ _) = s >= 50
     error50 _                          = False
-    getMessage (LogMessage _ _ m) = Just m
-    getMessage _                  = Nothing
+    getMessageMaybe (LogMessage _ _ m) = Just m
+    getMessageMaybe _                  = Nothing
 
 -- ex6
 -- sort events and find the events happened before a particular log message
