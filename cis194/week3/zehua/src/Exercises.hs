@@ -47,11 +47,25 @@ skips :: [a] -> [[a]]
 --   https://kseo.github.io/posts/2016-12-24-reader-monad-and-ski-combinators.html
 -- skips = map every . zip [0..] . (flip replicate <*> length)
 -- skips = take . length <*> map every . zip [0..] . repeat
-
 -- seems to be the most readable
 -- 44 + 73 = 117 chars
-skips l = map every . zip [0..] $ replicate (length l) l
+--skips l = map every . zip [0..] $ replicate (length l) l
 
+-- utilizing list applicative to save calls to repeat
+-- and use a curried version of every to avoid zip
+-- everY = curry every
+-- 66 chars
+everY :: Int -> [a] -> [a]
+everY n xs = case drop n xs of
+              (y:ys) -> y : everY n ys
+              []     -> []
+-- reader applicative and list applicative
+-- skips = take . length <*> (\l -> everY <$> [0..] <*> [l])
+-- skips = take . length <*> ap (everY <$> [0..]) . pure
+-- 66 + 44 = 110 chars
+-- somehow non-point-free version is shorter due to [] vs pure
+--  and probably more intuitive due to <$> .. <*> .. vs ap (.. <$> ..)
+skips l = take (length l) $ everY <$> [0..] <*> [l]
 
 -- ex2
 localMaxima :: [Integer] -> [Integer]
