@@ -123,4 +123,8 @@ histogram =
         -- (\i -> map $ bool ' ' '*' . (==i))
         map . ((bool ' ' '*') .) . (==)
           <$> [0..9])
+    -- liftA2 version is 1 char longer
+    -- . liftA2
+    --    (map . ((bool ' ' '*') .) . (==))
+    --    [0..9]
     . pure
