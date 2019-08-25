@@ -1,5 +1,6 @@
 module Exercises where
 
+import           Control.Applicative (liftA2)
 import           Control.Monad (ap)
 import           Data.Bool (bool)
 import           Data.Char (isSpace)
@@ -62,10 +63,17 @@ everY n xs = case drop n xs of
 -- reader applicative and list applicative
 -- skips = take . length <*> (\l -> everY <$> [0..] <*> [l])
 -- skips = take . length <*> ap (everY <$> [0..]) . pure
--- 66 + 44 = 110 chars
+-- 66 + 40 = 106 chars
 -- somehow non-point-free version is shorter due to [] vs pure
 --  and probably more intuitive due to <$> .. <*> .. vs ap (.. <$> ..)
-skips l = take (length l) $ everY <$> [0..] <*> [l]
+-- skips l = take (length l) $ everY <$> [0..] <*> [l]
+-- use liftA2 instead of .. <$> .. <*> ..
+--  still 1 char longer than non-point-free, but as intuitive now
+-- skips = take . length <*> liftA2 everY [0..] . pure
+-- 66 + 40 = 106 chars
+-- skips l = take (length l) $ liftA2 everY [0..] [l]
+-- 66 + 37 = 103 chars
+skips l = liftA2 everY [0..(length l)-1] [l]
 
 -- ex2
 localMaxima :: [Integer] -> [Integer]
@@ -87,7 +95,7 @@ localMaxima =
 histogram :: [Integer] -> String
 {-
 -- 147 chars
-histogram = 
+histogram =
     (++ "==========\n0123456789\n")
     . unlines
     -- . dropWhile (== "          ")
