@@ -86,10 +86,16 @@ everY n xs = case drop n xs of
 -- skips = fmap . (flip sieve) <*> map fst . zip [1..]
 
 -- using sieve from Data.List.HT
+{-
+every = liftA2 (.) sieve (drop . (-1 +))
+every = (.) <$> sieve <*> drop . (-1 +))
+every n l = sieve n (drop (n-1) l)
+-}
 -- 55 chars point free every
 -- skips l = flip (liftA2 (.) sieve (drop . (-1 +))) l <$> [1..length l]
--- 48 chars
-skips l = (\k n -> sieve n (drop (n-1) k)) l <$> [1..length l]
+-- 46 chars
+-- skips l = (\n -> sieve n . drop (n-1) $ l) <$> [1..length l]
+skips l = (\n -> sieve n (drop (n-1) l)) <$> [1..length l]
 
 -- using ifilter from Data.List.Index to implement every
 -- every n = ifilter (\i _ -> (i+1) `mod` n == 0)
