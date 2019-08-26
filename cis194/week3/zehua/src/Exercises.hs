@@ -1,11 +1,12 @@
 module Exercises where
 
-import           Control.Applicative (liftA2)
+-- import           Control.Applicative (liftA2)
 import           Control.Monad (ap)
 import           Data.Bool (bool)
 import           Data.Char (isSpace)
 import           Data.List ({-group, -}sort, transpose)
-import           Data.List.Index (ifilter{-, imap-})
+import           Data.List.HT (sieve)
+-- import           Data.List.Index (ifilter{-, imap-})
 -- import           Data.Maybe (catMaybes)
 -- import           Data.List.Utils (countElem) -- from MissingH @ stackage
 import           Data.Tuple.Utils (snd3) -- from MissingH @ stackage
@@ -79,15 +80,21 @@ everY n xs = case drop n xs of
 -- skips = liftA2 everY (map fst . zip [1..]) pure
 -- 65 + 37 = 102 chars
 -- skips l = liftA2 everY [0..(length l)-1] [l]
--- 65 + 35 = 100 chars
--- skips l = (flip everY) l <$> [1..length l]
+-- 65 + 33 = 100 chars
+-- skips l = flip everY l <$> [1..length l]
 -- 65 + 40 = 105 chars
 -- skips = fmap . (flip sieve) <*> map fst . zip [1..]
+
+-- using sieve from Data.List.HT
+-- 55 chars point free every
+-- skips l = flip (liftA2 (.) sieve (drop . (-1 +))) l <$> [1..length l]
+-- 48 chars
+skips l = (\k n -> sieve n (drop (n-1) k)) l <$> [1..length l]
 
 -- using ifilter from Data.List.Index to implement every
 -- every n = ifilter (\i _ -> (i+1) `mod` n == 0)
 -- 60 chars
-skips l = liftA2 (\n -> ifilter (\i _ -> mod (i+1) n == 0)) [1..length l] [l]
+-- skips l = liftA2 (\n -> ifilter (\i _ -> mod (i+1) n == 0)) [1..length l] [l]
 -- 73 chars point free of l
 -- skips = liftA2 (liftA2 (\n -> ifilter (\i _ -> mod (i+1) n == 0)))  (map fst . zip [1..]) pure
 -- 70 chars point free in ifilter
