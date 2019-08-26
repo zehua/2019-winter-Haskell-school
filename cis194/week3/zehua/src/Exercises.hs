@@ -15,11 +15,11 @@ import           Data.Tuple.Utils (snd3) -- from MissingH @ stackage
 -- doing `drop n xs` instead of `drop (n-1) xs` to save 4 chars :)
 --   which requires passing in 0-based `zip [0..]` instead of `zip [1..]`
 -- keeping the name `every` instead of a short one-character name, e.g., `e`
--- 73 chars
+-- 72 chars
 every :: (Int, [a]) -> [a]
 every (n, xs) = case drop n xs of
               (y:ys) -> y : every (n, ys)
-              []     -> []
+              _      -> []
 
 -- 85 chars of every implementation based on iterate and splitAt
 -- (\n -> (\l -> map last . takeWhile (not . null) . map fst . tail . iterate (splitAt n . snd) . ([],) $ l)) 2 [1,2,3,4,5,6]
@@ -51,36 +51,44 @@ skips :: [a] -> [[a]]
 -- skips = map every . zip [0..] . (flip replicate <*> length)
 -- skips = take . length <*> map every . zip [0..] . repeat
 -- seems to be the most readable
--- 44 + 73 = 117 chars
+-- 44 + 72 = 116 chars
 --skips l = map every . zip [0..] $ replicate (length l) l
 
 -- utilizing list applicative to save calls to repeat
 -- and use a curried version of every to avoid zip
 -- everY = curry every
--- 66 chars
+-- 65 chars
 everY :: Int -> [a] -> [a]
 everY n xs = case drop n xs of
               (y:ys) -> y : everY n ys
-              []     -> []
+              _      -> []
 -- reader applicative and list applicative
 -- skips = take . length <*> (\l -> everY <$> [0..] <*> [l])
 -- skips = take . length <*> ap (everY <$> [0..]) . pure
--- 66 + 40 = 106 chars
+-- 65 + 40 = 105 chars
 -- somehow non-point-free version is shorter due to [] vs pure
 --  and probably more intuitive due to <$> .. <*> .. vs ap (.. <$> ..)
 -- skips l = take (length l) $ everY <$> [0..] <*> [l]
 -- use liftA2 instead of .. <$> .. <*> ..
 --  still 1 char longer than non-point-free, but as intuitive now
 -- skips = take . length <*> liftA2 everY [0..] . pure
--- 66 + 40 = 106 chars
+-- 65 + 40 = 105 chars
 -- skips l = take (length l) $ liftA2 everY [0..] [l]
--- 66 + 37 = 103 chars
+-- 65 + 38 = 103 chars
+-- skips = liftA2 everY (map fst . zip [1..]) pure
+-- 65 + 37 = 102 chars
 -- skips l = liftA2 everY [0..(length l)-1] [l]
+-- 65 + 35 = 100 chars
+-- skips l = (flip everY) l <$> [1..length l]
+-- 65 + 40 = 105 chars
+-- skips = fmap . (flip sieve) <*> map fst . zip [1..]
 
 -- using ifilter from Data.List.Index to implement every
 -- every n = ifilter (\i _ -> (i+1) `mod` n == 0)
 -- 60 chars
 skips l = liftA2 (\n -> ifilter (\i _ -> mod (i+1) n == 0)) [1..length l] [l]
+-- 73 chars point free of l
+-- skips = liftA2 (liftA2 (\n -> ifilter (\i _ -> mod (i+1) n == 0)))  (map fst . zip [1..]) pure
 -- 70 chars point free in ifilter
 -- skips l = liftA2 (\n -> ifilter (const . ((==0) . (`mod` n) . (+1)))) [1..length l] [l]
 
