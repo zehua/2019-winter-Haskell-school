@@ -5,7 +5,7 @@ import           Control.Monad (ap)
 import           Data.Bool (bool)
 import           Data.Char (isSpace)
 import           Data.List (sort, transpose)
--- import           Data.Tuple.Utils -- from stackage
+import           Data.Tuple.Utils (snd3) -- from MissingH @ stackage
 
 -- ex1
 
@@ -75,16 +75,26 @@ everY n xs = case drop n xs of
 -- 66 + 37 = 103 chars
 skips l = liftA2 everY [0..(length l)-1] [l]
 
+
+{-
+1234567890ABCDEF
+ 2 4 6 8 0 B D F
+  3  6  9  B  E
+   4   8   B   F
+    5    A    E
+     6     B
+      7      D
+       8       F
+-}
 -- ex2
 localMaxima :: [Integer] -> [Integer]
 -- using drop avoids having to check the edge cases of length <= 2
 --localMaxima []    = []
 --localMaxima [_]   = []
 --localMaxima [_,_] = []
--- 78 chars
+-- 69 chars
 localMaxima =
-    -- snd3 from Data.Tuple.Utils is not from haskell-platform :|
-    map (\(_, x, _) -> x)
+    map snd3
     . filter (\(x, y, z) -> x < y && y > z)
     -- $ zip3 l (drop 1 l) (drop 2 $ l) l
     -- . (zip3 <$> id <*> drop 1 <*> drop 2)
