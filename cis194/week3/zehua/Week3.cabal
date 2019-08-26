@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 42e4f36e35ce2710a9d551518acc316b14df78b420a7a68ddb5bf656f45d7172
+-- hash: e73c8097ece8ddb839059209a48cdc3e8833aac90117bbc439443da6442a3304
 
 name:           Week3
 version:        0.0.0
@@ -21,6 +21,7 @@ library
   build-depends:
       MissingH
     , base ==4.*
+    , ilist
   default-language: Haskell2010
 
 test-suite spec
@@ -37,5 +38,6 @@ test-suite spec
     , Week3
     , base ==4.*
     , hspec ==2.*
+    , ilist
   default-language: Haskell2010
   build-tool-depends: hspec-discover:hspec-discover == 2.*

@@ -5,6 +5,8 @@ import           Control.Monad (ap)
 import           Data.Bool (bool)
 import           Data.Char (isSpace)
 import           Data.List (sort, transpose)
+import           Data.List.Index (ifilter{-, imap-})
+-- import           Data.Maybe (catMaybes)
 import           Data.Tuple.Utils (snd3) -- from MissingH @ stackage
 
 -- ex1
@@ -73,19 +75,52 @@ everY n xs = case drop n xs of
 -- 66 + 40 = 106 chars
 -- skips l = take (length l) $ liftA2 everY [0..] [l]
 -- 66 + 37 = 103 chars
-skips l = liftA2 everY [0..(length l)-1] [l]
+-- skips l = liftA2 everY [0..(length l)-1] [l]
 
+-- using ifilter from Data.List.Index to implement every
+-- every n = ifilter (\i _ -> (i+1) `mod` n == 0)
+-- 60 chars
+skips l = liftA2 (\n -> ifilter (\i _ -> mod (i+1) n == 0)) [1..length l] [l]
+-- 70 chars point free in ifilter
+-- skips l = liftA2 (\n -> ifilter (const . ((==0) . (`mod` n) . (+1)))) [1..length l] [l]
 
 {-
+each column includes the value in rows that are factors of the current index,
+and then filter the empty cells in each row
 1234567890ABCDEF
  2 4 6 8 0 B D F
   3  6  9  B  E
    4   8   B   F
-    5    A    E
+    5    0    E
      6     B
       7      D
        8       F
 -}
+{-
+-- 114 chars
+skips = takeWhile (not . null)
+      . map catMaybes
+      . transpose
+      . imap (\i -> imap
+                      -- (flip ((. ((==0) . ((i+1) `mod`) . (+1))) . bool Nothing ))
+                      (\j a -> (bool Nothing a (mod (i+1) (j+1) == 0)))
+                  . repeat . Just)
+-}
+{-
+-- 109 chars
+skips l = map catMaybes
+        . transpose
+        . imap (\i -> imap
+                        (\j a -> (bool Nothing a (mod (i+1) (j+1) == 0)))
+                    . replicate (length l) . Just)
+        $ l
+-}
+--skips l = liftA2 everY [0..(length l)-1] [l]
+--skips l = map every . zip [0..] $ replicate (length l) l
+-- 67 chars
+-- skips l = imap (\i -> ifilter (\j _ -> mod (j+1) (i+1) == 0)) $ replicate (length l) l
+
+
 -- ex2
 localMaxima :: [Integer] -> [Integer]
 -- using drop avoids having to check the edge cases of length <= 2
