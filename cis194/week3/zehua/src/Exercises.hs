@@ -4,9 +4,10 @@ import           Control.Applicative (liftA2)
 import           Control.Monad (ap)
 import           Data.Bool (bool)
 import           Data.Char (isSpace)
-import           Data.List (sort, transpose)
+import           Data.List ({-group, -}sort, transpose)
 import           Data.List.Index (ifilter{-, imap-})
 -- import           Data.Maybe (catMaybes)
+-- import           Data.List.Utils (countElem) -- from MissingH @ stackage
 import           Data.Tuple.Utils (snd3) -- from MissingH @ stackage
 
 -- ex1
@@ -181,3 +182,31 @@ histogram =
     --    (map . ((bool ' ' '*') .) . (==))
     --    [0..9]
     . pure
+
+-- 137 chars using sort and group
+-- (++ "==========\n0123456789\n") . unlines . map (map (bool '*' ' ' . null)) . reverse . drop 1 . takeWhile (any null) . iterate (map (drop 1)) . group . sort . (++ [0..9])
+{-
+histogram =
+    (++ "==========\n0123456789\n")
+  . unlines
+  . map (map (bool '*' ' ' . null)) -- draw it
+  . reverse
+  . drop 1     -- revert the effect of step 1 (remove one occurrence for each)
+  . takeWhile (any null)
+  . iterate (map (drop 1)) -- gradually reduce the size by 1 in each sublist
+  . group      -- [[0], [1,1,1], [2], ... ]
+  . sort
+  . (++ [0..9]) -- add 1 occurrence for each number so that we get at least one entry for each
+-}
+-- 147 chars using countElem
+{-
+histogram =
+    (++ "==========\n0123456789\n")
+  . unlines
+  . map (map (bool '*' ' ' . (<1))) -- draw it
+  . reverse
+  . takeWhile (any (>0)) -- stop when all 0 or lower
+  . iterate (map (-1 +)) -- gradually reduce the size
+  -- (\l -> map ((flip countElem) l) [0..9])
+  . flip (map . flip countElem) [0..9] -- count occurrences of each number
+-}
