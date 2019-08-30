@@ -74,6 +74,9 @@ cartProd :: [a] -> [b] -> [(a, b)]
 cartProd xs ys = [(x,y) | x <- xs, y <- ys]
 
 sieveSundaram :: Integer -> [Integer]
+-- producing the list of numbers to be filtered
+-- then joining it with the original list
+-- then sort and group to find those that occur only once
 sieveSundaram n = map ((+1) . (*2))
                 . concat
                 . filter ((==1) . length)
@@ -82,5 +85,5 @@ sieveSundaram n = map ((+1) . (*2))
                 . ([1..n] ++)
                 . filter (<=n)
                 . map (\(i, j) -> i + j + 2 * i * j)
-                . filter (uncurry (<=))
+                . filter (uncurry (<=)) -- could have just done [(x,y) | x <- [1..n], y <- [x..n]]
                 $ cartProd [1..n] [1..n]
