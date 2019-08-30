@@ -56,9 +56,10 @@ spec = do
       foldTree "A" `shouldBe` (Node 0 Leaf 'A' Leaf)
 
     it "works with multiple items" $ do
-      foldTree "AB" `shouldSatisfy` isBalancedTree
-      foldTree "ABCDEFG" `shouldSatisfy` isBalancedTree
-      foldTree "ABCDEFGHIJKLMNOPQRSTUVWXYZ" `shouldSatisfy` isBalancedTree
+      mapM_ (\l -> foldTree l `shouldSatisfy` isBalancedTree)
+        [ "AB"
+        , "ABCDEFG"
+        , "ABCDEFGHIJKLMNOPQRSTUVWXYZ" ]
 
   describe "ex3" $ do
     it "xor" $ do
