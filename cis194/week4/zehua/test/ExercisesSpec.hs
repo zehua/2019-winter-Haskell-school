@@ -1,9 +1,8 @@
 module ExercisesSpec where
 
--- import           Control.Applicative (liftA2)
-import           Control.Monad (liftM2)
-import           Data.Bool (bool)
-import           Data.Char (isSpace, isUpper)
+import           Control.Monad       (liftM2)
+import           Data.Bool           (bool)
+import           Data.Char           (isSpace, isUpper)
 import           Data.Numbers.Primes (primes)
 import           Exercises
 import           Test.Hspec

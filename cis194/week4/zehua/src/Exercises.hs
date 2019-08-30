@@ -34,7 +34,7 @@ data Tree a = Leaf
   deriving (Show, Eq)
 
 getHeight :: Tree a -> Integer
-getHeight Leaf = -1
+getHeight Leaf            = -1
 getHeight (Node h1 _ _ _) = h1
 
 foldTree :: [a] -> Tree a
