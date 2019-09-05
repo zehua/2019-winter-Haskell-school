@@ -66,7 +66,18 @@ map' f = foldr ((:) . f) []
 
 
 myFoldl :: (a -> b -> a) -> a -> [b] -> a
-myFoldl f base = foldr (flip f) base . reverse
+-- myFoldl f base = foldr (flip f) base . reverse
+-- single foldr, with function as accumulator
+-- reverse' :: [a] -> [a]
+-- reverse' l = foldr (\x g -> g . (x:)) id l []
+-- reverse' l = foldr (\x g -> g . ((:) x)) id l []
+-- myFoldl f base l = foldr (flip f) base reverse'
+-- combining the two foldr into one
+-- myFoldl f base l = foldr (\x g v -> g (f v x)) id l base
+myFoldl f base l = foldr (\x g -> g . flip f x) id l base
+-- myFoldl f base l = foldr (\x g -> flip (.) (flip f x) g) id l base
+-- myFoldl f base l = foldr (\x -> flip (.) (flip f x)) id l base
+-- myFoldl f base l = foldr (flip (.) . flip f) id l base
 
 
 -- ex4

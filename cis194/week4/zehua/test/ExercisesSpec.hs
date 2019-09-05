@@ -63,12 +63,14 @@ spec = do
 
   describe "ex3" $ do
     it "xor" $ do
-      xor [] `shouldBe` False
-      xor [True] `shouldBe` True
-      xor [True, False, True] `shouldBe` False
-      xor [True, False, True, False] `shouldBe` False
-      xor [True, False, True, False, False] `shouldBe` False
-      xor [True, False, True, True, False, False] `shouldBe` True
+      mapM_ (\(l, v) -> xor l `shouldBe` v)
+      -- mapM_ (uncurry (shouldBe . xor))
+        [ ([], False)
+        , ([True], True)
+        , ([True, False, True], False)
+        , ([True, False, True, False], False)
+        , ([True, False, True, False, False], False)
+        , ([True, False, True, True, False, False], True) ]
 
     it "map" $ do
       mapM_ (liftM2 shouldBe (uncurry map') (uncurry map)) $
