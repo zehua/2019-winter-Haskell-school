@@ -72,7 +72,10 @@ myFoldl :: (a -> b -> a) -> a -> [b] -> a
 -- reverse' l = foldr (\x g -> g . (x:)) id l []
 -- reverse' l = foldr (\x g -> g . ((:) x)) id l []
 -- myFoldl f base l = foldr (flip f) base reverse'
--- combining the two foldr into one
+-- combining the two foldr's into one
+-- One nice side-effect of getting rid of the reverse function is that this implementation
+--  is not tied to [b] and could now support the more general Foldable type
+--  i.e., myFoldl :: Foldable t -> (a -> b -> a) -> a -> t b -> a
 -- myFoldl f base l = foldr (\x g v -> g (f v x)) id l base
 myFoldl f base l = foldr (\x g -> g . flip f x) id l base
 -- myFoldl f base l = foldr (\x g -> flip (.) (flip f x) g) id l base
