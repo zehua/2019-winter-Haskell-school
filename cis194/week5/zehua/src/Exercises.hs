@@ -1,12 +1,12 @@
+{-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances #-}
 module Exercises where
 
-import qualified Data.Map   as M
 import           Control.Monad (liftM2)
-import qualified ExprT      as E
-import           Parser     (parseExp)
-import qualified StackVM    as S
+import qualified Data.Map      as M
+import qualified ExprT         as E
+import           Parser        (parseExp)
+import qualified StackVM       as S
 
 -- ex1
 eval :: E.ExprT -> Integer
