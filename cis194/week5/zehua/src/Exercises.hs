@@ -2,11 +2,12 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 module Exercises where
 
-import           Control.Monad (liftM2)
-import qualified Data.Map      as M
-import qualified ExprT         as E
-import           Parser        (parseExp)
-import qualified StackVM       as S
+import           Control.Applicative (liftA2)
+import           Control.Monad       (liftM2)
+import qualified Data.Map            as M
+import qualified ExprT               as E
+import           Parser              (parseExp)
+import qualified StackVM             as S
 
 -- ex1
 eval :: E.ExprT -> Integer
@@ -90,5 +91,8 @@ instance HasVars (M.Map String Integer -> Maybe Integer) where
 
 instance Expr (M.Map String Integer -> Maybe Integer) where
   lit = const . Just
-  add f1 f2 m = liftM2 (+) (f1 m) (f2 m)
-  mul f1 f2 m = liftM2 (*) (f1 m) (f2 m)
+  -- add f1 f2 m = liftM2 (+) (f1 m) (f2 m)
+  -- add f1 f2 = liftM2 (+) <$> f1 <*> f2
+  -- add f1 f2 = liftA2 (liftM2 (+)) f1 f2
+  add = liftA2 . liftM2 $ (+)
+  mul = liftA2 . liftM2 $ (*)
