@@ -4,6 +4,7 @@ import           Control.Monad (mapM_)
 import           Data.Monoid
 import           Exercises
 import           JoinList
+import           Scrabble
 import           Sized
 import           Test.Hspec
 
@@ -137,3 +138,10 @@ spec = do
             (singleSize 1 "ghi")))
       takeJ 4 dataSize4 `shouldBe` dataSize4
       takeJ 5 dataSize4 `shouldBe` dataSize4
+
+  describe "ex3" $ do
+    it "works for scoreLine" $ do
+      scoreLine "yay " +++ scoreLine "haskell!" `shouldBe`
+        Append (Score 23)
+          (Single (Score 9) "yay ")
+          (Single (Score 14) "haskell!")

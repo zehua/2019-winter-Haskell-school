@@ -164,3 +164,7 @@ takeJFold = foldJoinList
 
 takeJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
 takeJ = takeJFold
+
+
+-- ex3
+-- in Scrabble.hs
