@@ -1,7 +1,7 @@
 module ExercisesSpec where
 
-import           Data.Monoid --(Product)
 import           Control.Monad (mapM_)
+import           Data.Monoid
 import           Exercises
 import           JoinList
 import           Sized
@@ -36,6 +36,9 @@ jlToList Empty            = []
 jlToList (Single _ a)     = [a]
 jlToList (Append _ l1 l2) = jlToList l1 ++ jlToList l2
 
+dataEmptyJL :: JoinList Size String
+dataEmptyJL = Empty
+
 dataSize1 :: JoinList Size String
 dataSize1 = singleSize 1 "abc"
 
@@ -62,34 +65,75 @@ spec = do
   describe "ex2" $ do
     it "works for indexJ that returns Nothing" $ do
       indexJ 0 (Empty :: JoinList Size String) `shouldBe` Nothing
-      indexJ (-1) (singleSize 2 "abc") `shouldBe` Nothing
-      indexJ 1 (singleSize 2 "abc") `shouldBe` Nothing
-      indexJ 10 (appendSize 9 (singleSize 3 "abc") (singleSize 3 "def")) `shouldBe` Nothing
+      indexJ (-1) dataSize1 `shouldBe` Nothing
+      indexJ 1 dataSize1 `shouldBe` Nothing
+      indexJ 2 dataSize2 `shouldBe` Nothing
 
     it "works for indexJ" $ do
       mapM_ (\(i, jl) -> indexJ i jl `shouldBe` jlToList jl !!? i)
-        [ (0, singleSize 2 "b")
-        , (0, appendSize 2 (singleSize 1 "a") (singleSize 1 "b"))
-        , (1, appendSize 2 (singleSize 1 "a") (singleSize 1 "b")) ]
+        [ (0, dataSize1)
+        , (0, dataSize2)
+        , (1, dataSize2) ]
 
-    it "works for dropJ" $ do
-      dropJ 0 (Empty :: JoinList Size String) `shouldBe` Empty
-      dropJ (-1) (singleSize 2 "abc") `shouldBe` singleSize 2 "abc"
-      dropJ (-2) (appendSize 9 (singleSize 3 "abc") (singleSize 3 "def"))
-        `shouldBe` (appendSize 9 (singleSize 3 "abc") (singleSize 3 "def"))
+    it "works for dropJ with empty" $ do
+      dropJ (-1) dataEmptyJL `shouldBe` Empty
+      dropJ 0 dataEmptyJL `shouldBe` Empty
+      dropJ 1 dataEmptyJL `shouldBe` Empty
+
+    it "works for dropJ with size 1" $ do
+      dropJ (-1) dataSize1 `shouldBe` dataSize1
       dropJ 0 dataSize1 `shouldBe` dataSize1
       dropJ 1 dataSize1 `shouldBe` Empty
-      dropJ 1 dataSize2 `shouldBe` singleSize 1 "def"
-      dropJ 0 dataSize4 `shouldBe` dataSize4
-      dropJ 2 dataSize4 `shouldBe` (appendSize 2 (singleSize 1 "ghi") (singleSize 1 "jkl"))
+      dropJ 2 dataSize1 `shouldBe` Empty
 
-    it "works for takeJ" $ do
-      takeJ 0 (Empty :: JoinList Size String) `shouldBe` Empty
+    it "works for dropJ with size 2" $ do
+      dropJ (-2) dataSize2 `shouldBe` dataSize2
+      dropJ 0 dataSize2 `shouldBe` dataSize2
+      dropJ 1 dataSize2 `shouldBe` singleSize 1 "def"
+      dropJ 2 dataSize2 `shouldBe` Empty
+      dropJ 3 dataSize2 `shouldBe` Empty
+
+    it "works for dropJ with size 4" $ do
+      dropJ (-1) dataSize4 `shouldBe` dataSize4
+      dropJ 0 dataSize4 `shouldBe` dataSize4
+      dropJ 1 dataSize4 `shouldBe` (appendSize 3
+                                     (appendSize 2
+                                       (singleSize 1 "def")
+                                       (singleSize 1 "ghi"))
+                                     (singleSize 1 "jkl"))
+      dropJ 2 dataSize4 `shouldBe` (appendSize 2 (singleSize 1 "ghi") (singleSize 1 "jkl"))
+      dropJ 3 dataSize4 `shouldBe` (singleSize 1 "jkl")
+      dropJ 4 dataSize4 `shouldBe` Empty
+      dropJ 5 dataSize4 `shouldBe` Empty
+
+    it "works for takeJ with empty" $ do
+      takeJ (-1) dataEmptyJL `shouldBe` Empty
+      takeJ 0 dataEmptyJL `shouldBe` Empty
+      takeJ 1 dataEmptyJL `shouldBe` Empty
+
+    it "works for takeJ with size 1" $ do
       takeJ (-1) dataSize1 `shouldBe` Empty
-      takeJ (-2) dataSize2 `shouldBe` Empty
       takeJ 0 dataSize1 `shouldBe` Empty
       takeJ 1 dataSize1 `shouldBe` dataSize1
+      takeJ 2 dataSize1 `shouldBe` dataSize1
+
+    it "works for takeJ with size 2" $ do
+      takeJ (-1) dataSize2 `shouldBe` Empty
+      takeJ 0 dataSize2 `shouldBe` Empty
       takeJ 1 dataSize2 `shouldBe` dataSize1
       takeJ 2 dataSize2 `shouldBe` dataSize2
+      takeJ 3 dataSize2 `shouldBe` dataSize2
+
+    it "works for takeJ with size 4" $ do
+      takeJ (-1) dataSize4 `shouldBe` Empty
+      takeJ 0 dataSize4 `shouldBe` Empty
+      takeJ 1 dataSize4 `shouldBe` dataSize1
       takeJ 2 dataSize4 `shouldBe` dataSize2
+      takeJ 3 dataSize4 `shouldBe`
+        (appendSize 3
+          (singleSize 1 "abc")
+          (appendSize 2
+            (singleSize 1 "def")
+            (singleSize 1 "ghi")))
       takeJ 4 dataSize4 `shouldBe` dataSize4
+      takeJ 5 dataSize4 `shouldBe` dataSize4

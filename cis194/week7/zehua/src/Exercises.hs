@@ -15,7 +15,7 @@ tag (Append m _ _) = m
 (+++) :: Monoid m => JoinList m a -> JoinList m a -> JoinList m a
 Empty +++ a     = a
 a     +++ Empty = a
-j1    +++ j2    = Append (mappend m1 m2) j1 j2
+j1    +++ j2    = Append (m1 <> m2) j1 j2
   where
     m1 = tag j1
     m2 = tag j2
