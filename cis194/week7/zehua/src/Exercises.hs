@@ -28,48 +28,139 @@ sizedTag = tag
 getSizeFromTag :: (Sized m, Monoid m) => JoinList m a -> Int
 getSizeFromTag = getSize . size . sizedTag
 
-indexJ :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
-indexJ _ Empty     = Nothing
-indexJ i _ | i < 0 = Nothing
-indexJ i (Single _ a)
+foldJoinList :: (Sized b, Monoid b) => 
+  -- e :: _ Empty
+  c ->
+  -- i0 :: i a | i < 0
+  (JoinList b a -> c) ->
+  -- s0 :: i s@(Single _ _) with i == 0
+  (JoinList b a -> c) ->
+  -- s1 :: i s@(Single _ _) with i > 0
+  (JoinList b a -> c) ->
+  -- so :: i s@(Single _ _) with otherwise
+  (JoinList b a -> c) ->
+  -- a0ge :: i j@(Append _ j1 j2) with i >= size0
+  (Int -> Int -> JoinList b a -> c) ->
+  -- a1l :: i j@(Append _ j1 j2) with i < size1
+  (Int -> Int -> JoinList b a -> c) ->
+  -- a1e :: i j@(Append _ j1 j2) with i == size0
+  (Int -> Int -> JoinList b a -> c) ->
+  -- a1g :: i j@(Append _ j1 j2) with i > size1 (but < size0)
+  (Int -> Int -> JoinList b a -> c) ->
+  Int -> JoinList b a -> c
+foldJoinList e _  _  _  _  _    _   _   _   _ Empty     = e
+foldJoinList _ i0 _  _  _  _    _   _   _   i a | i < 0 = i0 a
+foldJoinList _ _  s0 s1 so _    _   _   _   i s@(Single _ _)
+  | i == 0    = s0 s
+  | i > 0     = s1 s
+  | otherwise = so s
+foldJoinList _ _  _  _  _  a0ge a1l a1e a1g i j@(Append _ j1 _)
+  | i >= size0  = a0ge size1 i j
+  | i < size1   = a1l  size1 i j
+  | i == size1  = a1e  size1 i j
+  | otherwise   = a1g  size1 i j -- i > size1 and i < size0
+  where
+    size0 = getSizeFromTag j
+    size1 = getSizeFromTag j1
+
+indexJDirect :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
+indexJDirect _ Empty     = Nothing
+indexJDirect i _ | i < 0 = Nothing
+indexJDirect i (Single _ a)
   | i == 0    = Just a
   | otherwise = Nothing
-indexJ i j@(Append _ j1 j2)
+indexJDirect i j@(Append _ j1 j2)
   | i >= size0 = Nothing
-  | i < size1  = indexJ i j1
-  | otherwise  = indexJ (i - size1) j2
+  | i < size1  = indexJDirect i j1
+  | otherwise  = indexJDirect (i - size1) j2
   where
     size0 = getSizeFromTag j
     size1 = getSizeFromTag j1
 
-dropJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
-dropJ _ Empty     = Empty
-dropJ i a | i < 0 = a
-dropJ i s@(Single _ _)
+indexJFold :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
+indexJFold = foldJoinList
+    Nothing
+    (const Nothing)
+    s0 (const Nothing) (const Nothing)
+    a0ge a1l a1ge a1ge
+  where
+    s0 (Single _ a) = Just a
+    s0 _            = Nothing
+    a0ge _     _ _               = Nothing
+    a1l  _     i (Append _ j1 _) = indexJFold i j1
+    a1l  _     _ _               = Nothing
+    a1ge size1 i (Append _ _ j2) = indexJFold (i - size1) j2
+    a1ge _     _ _               = Nothing
+
+indexJ :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
+indexJ = indexJFold
+
+dropJDirect :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
+dropJDirect _ Empty     = Empty
+dropJDirect i a | i < 0 = a
+dropJDirect i s@(Single _ _)
   | i == 0    = s
   | otherwise = Empty
-dropJ i j@(Append _ j1 j2)
+dropJDirect i j@(Append _ j1 j2)
   | i >= size0 = Empty
-  | i < size1  = let j1New   = dropJ i j1
-                     sizeNew = mappend (sizedTag j1New) (sizedTag j2)
+  | i < size1  = let j1New   = dropJDirect i j1
+                     sizeNew = (sizedTag j1New) <> (sizedTag j2)
                  in Append sizeNew j1New j2
-  | otherwise  = dropJ (i - size1) j2
+  | otherwise  = dropJDirect (i - size1) j2
   where
     size0 = getSizeFromTag j
     size1 = getSizeFromTag j1
 
-takeJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
-takeJ _ Empty     = Empty
-takeJ i _ | i < 0 = Empty
-takeJ i s@(Single _ _)
-  | i == 1    = s
+dropJFold :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
+dropJFold = foldJoinList
+    Empty
+    id
+    id (const Empty) (const Empty)
+    a0ge a1l a1ge a1ge
+  where
+    a0ge _     _ _                = Empty
+    a1l  _     i (Append _ j1 j2) =
+      let j1New   = dropJFold i j1
+          sizeNew = (sizedTag j1New) <> (sizedTag j2)
+      in Append sizeNew j1New j2
+    a1l  _     _ _                = Empty
+    a1ge size1 i (Append _ _ j2)  = dropJFold (i - size1) j2
+    a1ge _     _ _                = Empty
+
+dropJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
+dropJ = dropJFold
+
+takeJDirect :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
+takeJDirect _ Empty     = Empty
+takeJDirect i _ | i < 0 = Empty
+takeJDirect i s@(Single _ _)
+  | i >= 1    = s
   | otherwise = Empty
-takeJ i j@(Append _ j1 j2)
+takeJDirect i j@(Append _ j1 j2)
   | i >= size0 = j
-  | i > size1  = let j2New   = takeJ (i - size1) j2
-                     sizeNew = mappend (sizedTag j1) (sizedTag j2New)
+  | i > size1  = let j2New   = takeJDirect (i - size1) j2
+                     sizeNew = (sizedTag j1) <> (sizedTag j2New)
                  in Append sizeNew j1 j2New
-  | otherwise  = takeJ i j1
+  | otherwise  = takeJDirect i j1
   where
     size0 = getSizeFromTag j
     size1 = getSizeFromTag j1
+
+takeJFold :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
+takeJFold = foldJoinList
+    Empty
+    (const Empty)
+    (const Empty) id (const Empty)
+    a0ge a1le a1le a1g
+  where
+    a0ge _     _ j                = j
+    a1le _     i (Append _ j1 _)  = takeJFold i j1
+    a1le _     _ _                = Empty
+    a1g  size1 i (Append _ j1 j2) =
+      let j2New   = takeJFold (i - size1) j2
+          sizeNew = (sizedTag j1) <> (sizedTag j2New)
+      in Append sizeNew j1 j2New
+    a1g  _     _ _                = Empty
+
+takeJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
+takeJ = takeJFold
