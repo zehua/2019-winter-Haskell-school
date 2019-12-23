@@ -12,46 +12,17 @@ import           Sized
 -- to avoid orphan instance warning
 newtype BufferJoinList = BufferJoinList { getJoinList :: JoinList (Score, Size) String }
 
-foldJoinListScoreSize :: a -> (JoinList (Score, Size) String -> a) -> (JoinList (Score, Size) String -> a) -> JoinList (Score, Size) String -> a
-foldJoinListScoreSize e _ _ Empty                 = e
-foldJoinListScoreSize _ i _ s@(Single (_, _) _)   = i s
-foldJoinListScoreSize _ _ a j@(Append (_, _) _ _) = a j
-
-getJoinListScoreDirect :: JoinList (Score, Size) String -> Score
-getJoinListScoreDirect = fst . tag
-
-getJoinListScoreFold :: JoinList (Score, Size) String -> Score
-getJoinListScoreFold = foldJoinListScoreSize 0 (fst . tag) (fst . tag)
-
 getJoinListScore :: JoinList (Score, Size) String -> Score
-getJoinListScore = getJoinListScoreFold
-
-getJoinListSizeDirect :: JoinList (Score, Size) String -> Size
-getJoinListSizeDirect Empty               = 0
-getJoinListSizeDirect (Single _ _)        = 1
-getJoinListSizeDirect (Append (_, s) _ _) = s
-
-getJoinListSizeFold :: JoinList (Score, Size) String -> Size
-getJoinListSizeFold = foldJoinListScoreSize 0 (const 1) (snd . tag)
+getJoinListScore = fst . tag
 
 getJoinListSize :: JoinList (Score, Size) String -> Size
-getJoinListSize = getJoinListSizeFold
-
-toLinesDirect :: JoinList (Score, Size) String -> [String]
-toLinesDirect Empty            = []
-toLinesDirect (Single _ s)     = [s]
-toLinesDirect (Append _ j1 j2) = toLinesDirect j1 ++ toLinesDirect j2
-
-toLinesFold :: JoinList (Score, Size) String -> [String]
-toLinesFold = foldJoinListScoreSize [] i a
-  where
-    i (Single _ s) = [s]
-    i _            = []
-    a (Append _ j1 j2) = toLinesFold j1 ++ toLinesFold j2
-    a _                = []
+getJoinListSize (Single _ _) = 1
+getJoinListSize s            = snd . tag $ s
 
 toLines :: JoinList (Score, Size) String -> [String]
-toLines = toLinesFold
+toLines Empty            = []
+toLines (Single _ s)     = [s]
+toLines (Append _ j1 j2) = toLines j1 ++ toLines j2
 
 jlToString :: JoinList (Score, Size) String -> String
 jlToString = unlines . toLines
