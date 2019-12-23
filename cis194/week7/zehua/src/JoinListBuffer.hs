@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
 module JoinListBuffer where
 
 import           Data.Monoid ()
@@ -12,12 +11,12 @@ import           Sized
 -- to avoid orphan instance warning
 newtype BufferJoinList = BufferJoinList { getJoinList :: JoinList (Score, Size) String }
 
+-- for score and size, we trust that their values have been correctly calculated during construction
 getJoinListScore :: JoinList (Score, Size) String -> Score
 getJoinListScore = fst . tag
 
 getJoinListSize :: JoinList (Score, Size) String -> Size
-getJoinListSize (Single _ _) = 1
-getJoinListSize s            = snd . tag $ s
+getJoinListSize = snd . tag
 
 toLines :: JoinList (Score, Size) String -> [String]
 toLines Empty            = []
@@ -31,10 +30,8 @@ fromLines :: [String] -> JoinList (Score, Size) String
 fromLines []  = Empty
 fromLines [s] = Single ((scoreString s), 1) s
 fromLines ls  = let l = length ls
-                    (l1, l2) = splitAt ((l + 1) `div` 2) ls
-                    j1 = fromLines l1
-                    j2 = fromLines l2
-                in j1 +++ j2
+                    (l1, l2) = splitAt ((l + 1) `div` 2) ls -- divide in half to create a balanced tree
+                in fromLines l1 +++ fromLines l2
 
 stringToJL :: String -> JoinList (Score, Size) String
 stringToJL = fromLines . lines
@@ -46,8 +43,8 @@ replaceLineJL n l jl
   where
     pre  = takeJ n jl
     nAndAfter = dropJ n jl
-    lenPre = getSize (getJoinListSize pre)
-    lenAfter = getSize (getJoinListSize nAndAfter)
+    lenPre = getSize . getJoinListSize $ pre
+    lenAfter = getSize . getJoinListSize $ nAndAfter
     newL = fromLines [l]
     post = dropJ 1 nAndAfter
 
