@@ -1,8 +1,7 @@
-module ExercisesSpec where
+module JoinListSpec where
 
 import           Control.Monad (mapM_)
 import           Data.Monoid
-import           Exercises
 import           JoinList
 import           Scrabble
 import           Sized

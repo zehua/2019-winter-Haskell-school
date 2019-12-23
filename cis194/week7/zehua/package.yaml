@@ -5,6 +5,7 @@ ghc-options: -Wall -fprint-potential-instances
 
 dependencies:
  - base == 4.*
+ - ilist == 0.3.*
  - mtl
 
 library:
