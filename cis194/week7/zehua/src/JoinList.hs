@@ -2,7 +2,7 @@ module JoinList where
 
 
 import           Scrabble
-import Sized
+import           Sized
 
 data JoinList m a = Empty
                   | Single m a
@@ -127,8 +127,8 @@ dropJFold = foldJoinList
           sizeNew = (sizedTag j1New) <> (sizedTag j2)
       in Append sizeNew j1New j2
     a1l  _     _ _                = Empty
-    a1ge size1 i (Append _ _ j2)  = dropJFold (i - size1) j2
-    a1ge _     _ _                = Empty
+    a1ge size1 i (Append _ _ j2) = dropJFold (i - size1) j2
+    a1ge _     _ _               = Empty
 
 dropJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
 dropJ = dropJFold
@@ -157,8 +157,8 @@ takeJFold = foldJoinList
     a0ge a1le a1le a1g
   where
     a0ge _     _ j                = j
-    a1le _     i (Append _ j1 _)  = takeJFold i j1
-    a1le _     _ _                = Empty
+    a1le _     i (Append _ j1 _) = takeJFold i j1
+    a1le _     _ _               = Empty
     a1g  size1 i (Append _ j1 j2) =
       let j2New   = takeJFold (i - size1) j2
           sizeNew = (sizedTag j1) <> (sizedTag j2New)
