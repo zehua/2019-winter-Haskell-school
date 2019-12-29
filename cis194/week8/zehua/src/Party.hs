@@ -36,3 +36,8 @@ nextLevel boss l = (wb, wob)
   where
     wb  = glCons boss mempty <> mconcat (map snd l)
     wob = mconcat (map fst l)
+
+
+-- ex4
+maxFun :: Tree Employee -> GuestList
+maxFun = uncurry moreFun . treeFold nextLevel

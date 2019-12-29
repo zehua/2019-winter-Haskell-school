@@ -1,6 +1,6 @@
 module PartySpec where
 
-import           Data.Tree  (Tree, rootLabel)
+import           Data.Tree  (Tree ( Node ), rootLabel)
 import           Employee
 import           Party
 import           Test.Hspec
@@ -74,3 +74,15 @@ spec = do
     it "works with multiple entries" $ do
       nextLevel testBoss [(sGL testEmp1, sGL testEmp2), (sGL testEmp3, sGL testEmp4)] `shouldBe`
         (sGL testBoss <> sGL testEmp2 <> sGL testEmp4, sGL testEmp1 <> sGL testEmp3)
+
+  describe "ex4" $ do
+    it "works" $ do
+      maxFun (Node testBoss []) `shouldBe` GL [ testBoss ] 9
+      maxFun testCompany `shouldBe` GL [ Emp {empName = "Bob", empFun = 2}
+                                       , Emp {empName = "John", empFun = 1}
+                                       , Emp {empName = "Sue", empFun = 5}
+                                       , Emp {empName = "Sarah", empFun = 17}] 25
+      maxFun testCompany2 `shouldBe` GL [ Emp {empName = "Bob", empFun = 3}
+                                       , Emp {empName = "John", empFun = 1}
+                                       , Emp {empName = "Sue", empFun = 5}
+                                       , Emp {empName = "Sarah", empFun = 17}] 26
