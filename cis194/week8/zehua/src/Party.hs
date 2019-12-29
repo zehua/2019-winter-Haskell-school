@@ -27,3 +27,12 @@ moreFun gl1@(GL _ f1) gl2@(GL _ f2)
 -- ex2
 treeFold :: (a -> [b] -> b) -> Tree a -> b
 treeFold f Node { rootLabel = l, subForest = sf } = f l (map (treeFold f) sf)
+-- treeFold f (Node l sf) = f l (map (treeFold f) sf)
+
+
+-- ex3
+nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
+nextLevel boss l = (wb, wob)
+  where
+    wb  = glCons boss mempty <> mconcat (map snd l)
+    wob = mconcat (map fst l)

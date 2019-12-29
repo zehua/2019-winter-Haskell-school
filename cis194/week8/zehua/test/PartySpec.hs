@@ -15,6 +15,12 @@ testEmp1 = Emp "employee 1" 5
 testEmp2 :: Employee
 testEmp2 = Emp "employee 2" 7
 
+testEmp3 :: Employee
+testEmp3 = Emp "employee 3" 9
+
+testEmp4 :: Employee
+testEmp4 = Emp "employee 4" 4
+
 -- build a singleton GuestList with one employee
 sGL :: Employee -> GuestList
 sGL e = glCons e mempty
@@ -55,3 +61,16 @@ spec = do
       employeeNames testCompany `shouldBe` ["Stan", "Bob", "Joe", "John", "Sue", "Fred", "Sarah", "Sam"]
       employeeNames testCompany2 `shouldBe` ["Stan", "Bob", "Joe", "John", "Sue", "Fred", "Sarah", "Sam"]
 
+  describe "ex3" $ do
+    it "works with empty" $ do
+      nextLevel testBoss [] `shouldBe` (sGL testBoss, mempty)
+      nextLevel testBoss [(mempty, mempty)] `shouldBe` (sGL testBoss, mempty)
+
+    it "works with single entry" $ do
+      nextLevel testBoss [(sGL testEmp1, mempty)] `shouldBe` (sGL testBoss, sGL testEmp1)
+      nextLevel testBoss [(mempty, sGL testEmp2)] `shouldBe` (sGL testBoss <> sGL testEmp2, mempty)
+      nextLevel testBoss [(sGL testEmp1, sGL testEmp2)] `shouldBe` (sGL testBoss <> sGL testEmp2, sGL testEmp1)
+
+    it "works with multiple entries" $ do
+      nextLevel testBoss [(sGL testEmp1, sGL testEmp2), (sGL testEmp3, sGL testEmp4)] `shouldBe`
+        (sGL testBoss <> sGL testEmp2 <> sGL testEmp4, sGL testEmp1 <> sGL testEmp3)
