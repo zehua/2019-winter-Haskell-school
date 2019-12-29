@@ -1,7 +1,8 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Party where
 
-import Employee
+import           Data.Tree
+import           Employee
 
 -- ex1
 glCons :: Employee -> GuestList -> GuestList
@@ -22,3 +23,7 @@ moreFun gl1@(GL _ f1) gl2@(GL _ f2)
   | f1 < f2   = gl2
   | otherwise = gl1
 
+
+-- ex2
+treeFold :: (a -> [b] -> b) -> Tree a -> b
+treeFold f Node { rootLabel = l, subForest = sf } = f l (map (treeFold f) sf)

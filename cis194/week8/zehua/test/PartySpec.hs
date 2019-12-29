@@ -1,6 +1,6 @@
 module PartySpec where
 
-import           Data.Tree (rootLabel)
+import           Data.Tree  (Tree, rootLabel)
 import           Employee
 import           Party
 import           Test.Hspec
@@ -22,6 +22,15 @@ sGL e = glCons e mempty
 testGL1n2 :: GuestList
 testGL1n2 = sGL testEmp1 <> sGL testEmp2
 
+countEmployees :: Tree Employee -> Integer
+countEmployees = treeFold (\_ l -> 1 + sum l)
+
+sumEmployeeFun :: Tree Employee -> Fun
+sumEmployeeFun = treeFold (\(Emp _ f) l -> f + sum l)
+
+employeeNames :: Tree Employee -> [Name]
+employeeNames = treeFold (\(Emp n _) l -> n : concat l)
+
 spec :: Spec
 spec = do
   describe "ex1" $ do
@@ -36,4 +45,13 @@ spec = do
       moreFun (sGL testEmp2) (sGL testEmp1) `shouldBe` sGL testEmp2
       moreFun (sGL testEmp2) (sGL testBoss) `shouldBe` sGL testBoss
       moreFun testGL1n2 (sGL testBoss) `shouldBe` testGL1n2
+
+  describe "ex2" $ do
+    it "works" $ do
+      countEmployees testCompany `shouldBe` 8
+      countEmployees testCompany2 `shouldBe` 8
+      sumEmployeeFun testCompany `shouldBe` 46
+      sumEmployeeFun testCompany2 `shouldBe` 47
+      employeeNames testCompany `shouldBe` ["Stan", "Bob", "Joe", "John", "Sue", "Fred", "Sarah", "Sam"]
+      employeeNames testCompany2 `shouldBe` ["Stan", "Bob", "Joe", "John", "Sue", "Fred", "Sarah", "Sam"]
 
