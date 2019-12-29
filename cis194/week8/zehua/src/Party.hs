@@ -1,7 +1,8 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Party where
 
-import           Data.Tree
+import           Data.List (sort)
+import           Data.Tree (Tree (Node, rootLabel, subForest))
 import           Employee
 
 -- ex1
@@ -41,3 +42,11 @@ nextLevel boss l = (wb, wob)
 -- ex4
 maxFun :: Tree Employee -> GuestList
 maxFun = uncurry moreFun . treeFold nextLevel
+
+
+-- ex5
+getFun :: GuestList -> Fun
+getFun (GL _ f) = f
+
+getSortedNames :: GuestList -> [Name]
+getSortedNames (GL l _) = sort . map (\(Emp n _) -> n) $ l

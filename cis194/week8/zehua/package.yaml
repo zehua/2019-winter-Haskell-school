@@ -10,6 +10,17 @@ dependencies:
 library:
   source-dirs: src
 
+executables:
+  party-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - Week8
+
 tests:
   spec:
     defaults: hspec/hspec@master
