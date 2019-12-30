@@ -1,4 +1,4 @@
-name: Week9
+name: Week10
 version: 0.0.0
 
 ghc-options: -Wall
@@ -12,4 +12,4 @@ library:
 tests:
   spec:
     defaults: hspec/hspec@master
-    dependencies: Week9
+    dependencies: Week10
