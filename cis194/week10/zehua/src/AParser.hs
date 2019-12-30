@@ -1,7 +1,7 @@
 module AParser where
 
 import           Control.Applicative
-import           Control.Monad (join)
+import           Control.Monad       (join)
 import           Data.Char
 
 -- A parser for a value of type a is a function which takes a String
@@ -62,8 +62,8 @@ instance Functor Parser where
   -- fmap :: (a -> b) -> Parser a -> Parser b
   -- fmap :: (a -> b) -> (String -> Maybe (a, String)) -> (String -> Maybe (b, String))
   fmap f pa = Parser (fmap (first f) . runParser pa)
-  -- fmap f = Parser . (.) (fmap (first f)) . runParser 
-  -- fmap f = Parser . (fmap . fmap . first) f . runParser 
+  -- fmap f = Parser . (.) (fmap (first f)) . runParser
+  -- fmap f = Parser . (fmap . fmap . first) f . runParser
 
 
 -- ex2
@@ -125,3 +125,33 @@ instance Applicative Parser where
                             Nothing -> Nothing
                             Just (vb, sb) -> Just (fa vb, sb)
   -}
+
+
+-- ex3
+abParser :: Parser (Char, Char)
+abParser = (,) <$> char 'a' <*> char 'b'
+
+abParser_ :: Parser ()
+abParser_ = const () <$> abParser
+
+createIntPair :: Integer -> Char -> Integer -> [Integer]
+createIntPair i1 _ i2 = [i1, i2]
+
+intPair :: Parser [Integer]
+intPair = createIntPair <$> posInt <*> char ' ' <*> posInt
+
+
+-- ex4
+instance Alternative Parser where
+  empty = Parser (const Nothing)
+  pa <|> pb = Parser pc
+    where
+      pc s = runParser pa s <|> runParser pb s
+  {- not sure if this Applicative Functor way of free version is more readable
+  pa <|> pb = Parser $ (<|>) <$> runParser pa <*> runParser pb
+  -}
+
+
+-- ex5
+intOrUppercase :: Parser ()
+intOrUppercase = const () <$> posInt <|> const () <$> satisfy isUpper
