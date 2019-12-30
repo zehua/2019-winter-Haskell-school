@@ -61,7 +61,7 @@ first f (a, c) = (f a, c)
 instance Functor Parser where
   -- fmap :: (a -> b) -> Parser a -> Parser b
   -- fmap :: (a -> b) -> (String -> Maybe (a, String)) -> (String -> Maybe (b, String))
-  fmap f pa = Parser (fmap (first f) . runParser pa)
+  fmap f pa = Parser $ fmap (first f) . runParser pa
   -- fmap f = Parser . (.) (fmap (first f)) . runParser
   -- fmap f = Parser . (fmap . fmap . first) f . runParser
 
