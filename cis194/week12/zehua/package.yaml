@@ -1,0 +1,17 @@
+name: Week12
+version: 0.0.0
+
+ghc-options: -Wall
+
+dependencies:
+ - base == 4.*
+ - MonadRandom == 0.5.*
+ - random == 1.*
+
+library:
+  source-dirs: src
+
+tests:
+  spec:
+    defaults: hspec/hspec@master
+    dependencies: Week12
