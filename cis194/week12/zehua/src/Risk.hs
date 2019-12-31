@@ -2,14 +2,14 @@
 
 module Risk where
 
-import Control.Monad.Random
-import Data.List (sortBy)
-import Data.Ord (comparing, Down(Down))
+import           Control.Monad.Random
+import           Data.List            (sortBy)
+import           Data.Ord             (Down (Down), comparing)
 
 ------------------------------------------------------------
 -- Die values
 
-newtype DieValue = DV { unDV :: Int } 
+newtype DieValue = DV { unDV :: Int }
   deriving (Eq, Ord, Show, Num)
 
 first :: (a -> b) -> (a, c) -> (b, c)
@@ -81,3 +81,23 @@ invade bf
     a = attackers bf
     d = defenders bf
     mbf = return bf
+
+
+-- ex4
+-- invade succeeds when defenders is 0
+invadeSucceeded :: Battlefield -> Bool
+invadeSucceeded = (==0) . defenders
+
+-- invade and compute whether it succeeds
+invadeAndCheck :: RandomGen g => Battlefield -> Rand g Bool
+invadeAndCheck = fmap invadeSucceeded . invade
+
+average :: Int -> [Bool] -> Double
+average n = (/ (fromIntegral n)) . fromIntegral . length . filter id
+
+successProbN :: RandomGen g => Int -> Battlefield -> Rand g Double
+successProbN n bf = fmap (average n) (replicateM n $ invadeAndCheck bf)
+
+-- successProb :: Battlefield -> Rand StdGen Double
+successProb :: RandomGen g => Battlefield -> Rand g Double
+successProb = successProbN 1000

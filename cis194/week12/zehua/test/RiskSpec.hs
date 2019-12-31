@@ -126,7 +126,7 @@ spec = do
         -- a: 5 d: 3,2 -> bf 2 2
         -- a: 6 d: 6,4 -> bf 1 2
         r1 <- invade $ bf 4 4
-        -- a: 6,4,3 d: 5,3 -> bf 4 1
+        -- a: 6,4,3 d: 5,3 -> bf 4 0
         r2 <- invade $ bf 4 2
         -- a: 3,2 d: 4,1 -> bf 2 1
         -- a: 1 d: 2 -> bf 1 1
@@ -148,3 +148,73 @@ spec = do
           r6 `shouldBe` bf 1 1
           r7 `shouldBe` bf 1 0
           )
+
+  describe "ex4" $ do
+    it "works for invadeSucceeded" $ do
+      invadeSucceeded (bf 1 1) `shouldBe` False
+      invadeSucceeded (bf 2 1) `shouldBe` False
+      invadeSucceeded (bf 2 0) `shouldBe` True
+      invadeSucceeded (bf 1 0) `shouldBe` True
+
+    it "works for invadeAndCheck via MockRandomGen" $ do
+      (flip evalRand) (mkMockRandomGen [1,2,3,4,5, 6,3,4, 5,3,2, 6,6,4
+                                       ,3,6,4,5,3
+                                       ,3,2,4,1, 1,2
+                                       ,5,6
+                                       ]) $ do
+        -- a: 3,2,1 d: 5,4 -> bf 2 4
+        -- a: 6 d: 4,3 -> bf 2 3
+        -- a: 5 d: 3,2 -> bf 2 2
+        -- a: 6 d: 6,4 -> bf 1 2
+        r1 <- invadeAndCheck $ bf 4 4
+        -- a: 6,4,3 d: 5,3 -> bf 4 0
+        r2 <- invadeAndCheck $ bf 4 2
+        -- no changes
+        r5 <- invadeAndCheck $ bf 2 0
+        -- no changes
+        r6 <- invadeAndCheck $ bf 1 1
+        return (\() -> do
+          r1 `shouldBe` False
+          r2 `shouldBe` True
+          r5 `shouldBe` True
+          r6 `shouldBe` False
+          )
+
+    it "works for average" $ do
+      average 2 [True, False] `shouldBe` 1 / 2
+      average 2 [False, False] `shouldBe` 0
+      average 2 [True, True] `shouldBe` 1.0
+      average 3 [False, False, False] `shouldBe` 0.0
+      average 3 [True, False, False] `shouldBe` 1 / 3
+      average 3 [True, True, False] `shouldBe` 2.0 / 3
+      average 3 [True, True, True] `shouldBe` 1
+
+    it "works for successProbN via MockRandomGen" $ do
+      (flip evalRand) (mkMockRandomGen [1,2,3,4,5, 6,3,4, 5,3,1, 4,3
+                                       ,3,6,4,5,3, 1,2,2,2, 2,4,3
+                                       ,3,2,4,3,5, 4,3,6,2
+                                       ]) $ do
+        -- round 1 True
+        -- a: 3,2,1 d: 5,4 -> bf 2 3
+        -- a: 6 d: 4,3 -> bf 2 2
+        -- a: 5 d: 3,1 -> bf 2 1
+        -- a: 4 d: 3 -> bf 2 0
+        -- round 2 True
+        -- a: 6,4,3 d: 5,3 -> bf 4 1
+        -- a: 2,2,1 d: 2 -> bf 3 1
+        -- a: 4,2 d: 3 -> bf 3 0
+        -- round 3 False
+        -- a: 4,3,2 d: 5,3 -> bf 2 3
+        -- a: 4,3 d: 6,2 -> bf 1 2
+        r1 <- successProbN 3 $ bf 4 3
+        return (\() -> do
+          r1 `shouldBe` 2 / 3
+          )
+
+    it "works for successProbN via StdGen" $ do
+      actual <- evalRandIO $ successProbN 50 (bf 4 4)
+      actual `shouldSatisfy` (&&) <$> (>=0) <*> (<=1)
+
+    it "works for successProb via StdGen" $ do
+      actual <- evalRandIO $ successProb (bf 4 4)
+      actual `shouldSatisfy` (&&) <$> (>=0) <*> (<=1)
