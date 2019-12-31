@@ -113,3 +113,38 @@ spec = do
           r6 `shouldBe` bf 2 0
           r7 `shouldBe` bf 1 1
           )
+
+  describe "ex3" $ do
+    it "works for invade via MockRandomGen" $ do
+      (flip evalRand) (mkMockRandomGen [1,2,3,4,5, 6,3,4, 5,3,2, 6,6,4
+                                       ,3,6,4,5,3
+                                       ,3,2,4,1, 1,2
+                                       ,5,6
+                                       ]) $ do
+        -- a: 3,2,1 d: 5,4 -> bf 2 4
+        -- a: 6 d: 4,3 -> bf 2 3
+        -- a: 5 d: 3,2 -> bf 2 2
+        -- a: 6 d: 6,4 -> bf 1 2
+        r1 <- invade $ bf 4 4
+        -- a: 6,4,3 d: 5,3 -> bf 4 1
+        r2 <- invade $ bf 4 2
+        -- a: 3,2 d: 4,1 -> bf 2 1
+        -- a: 1 d: 2 -> bf 1 1
+        r3 <- invade $ bf 3 2
+        -- a: 5 d: 6 -> bf 1 1
+        r4 <- invade $ bf 2 1
+        -- no changes
+        r5 <- invade $ bf 2 0
+        -- no changes
+        r6 <- invade $ bf 1 1
+        -- no changes
+        r7 <- invade $ bf 1 0
+        return (\() -> do
+          r1 `shouldBe` bf 1 2
+          r2 `shouldBe` bf 4 0
+          r3 `shouldBe` bf 1 1
+          r4 `shouldBe` bf 1 1
+          r5 `shouldBe` bf 2 0
+          r6 `shouldBe` bf 1 1
+          r7 `shouldBe` bf 1 0
+          )

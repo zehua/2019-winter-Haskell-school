@@ -69,3 +69,15 @@ battle bf = do
   dr <- dieNSorted $ dispatchDefenders bf
   let pairs = zip ar dr
   return $ updateBattlefield bf pairs
+
+
+-- ex3
+-- invade :: Battlefield -> Rand StdGen Battlefield
+invade :: RandomGen g => Battlefield -> Rand g Battlefield
+invade bf
+  | a > 1 && d > 0 = mbf >>= battle >>= invade
+  | otherwise      = mbf
+  where
+    a = attackers bf
+    d = defenders bf
+    mbf = return bf
